@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  file_app:
+    build:
+      context: ./file_app
+    volumes:
+      - ./file_app:/app
+      - ./uploads:/uploads
+    ports:
+      - 50000:50000
+      # - 6930-6940:6930-6940
+    env_file:
+      - .env
+  deezer_parser:
+    build:
+      context: ./parsers/deezer
+    volumes:
+      - ./parsers/deezer:/app
+    ports:
+      # - 50000:50000
+      - 6930-6940:6930-6940
+    env_file:
+      - .env
