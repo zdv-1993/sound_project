@@ -2,7 +2,13 @@
 COMMAND_UPLOAD_WITH_PARAMS = "upload_file_with_params"
 COMMAND_GET_FILE_PARAMS = "get_file_params"
 COMMAND_GET_FILE_DATA = "get_file_data"
+COMMAND_GET_FILES_LIST = "get_files_list"
 # End commands_______________________________________________
+
+# File constants
+FILE_SERVER_HOST = "file_app"
+FILE_SERVER_PORT = 50000
+# End file constants_________________________________________
 
 # Responses
 READY_TO_UPLOAD = "ready_to_upload"
@@ -23,6 +29,5 @@ UPLOADING_ERROR_RESPONSE = {"error": UPLOADING_ERROR}
 FILE_NOT_FOUND_ERROR = "file not found"
 FILE_NOT_FOUND_RESPONSE = {"error": FILE_NOT_FOUND_ERROR}
 
-PORT = 50000
 
 SENDED_BYTES_COUNT = 1024

@@ -5,19 +5,44 @@ services:
       context: ./file_app
     volumes:
       - ./file_app:/app
+      - ./shared:/app/shared
       - ./uploads:/uploads
     ports:
       - 50000:50000
       # - 6930-6940:6930-6940
     env_file:
       - .env
-  deezer_parser:
+    environment:
+      - FILE_FOLDER=/uploads
+  # deezer_parser:
+  #   build:
+  #     context: ./parsers/deezer
+  #   volumes:
+  #     - ./parsers/deezer:/app
+  #   ports:
+  #     # - 50000:50000
+  #     - 6930-6940:6930-6940
+  #   env_file:
+  #     - .env
+  db_app:
     build:
-      context: ./parsers/deezer
+      context: ./db_app
     volumes:
-      - ./parsers/deezer:/app
+      - ./db_app:/app
+      - ./shared:/app/shared
     ports:
-      # - 50000:50000
-      - 6930-6940:6930-6940
+      - 8000:8000
+      # - 6930-6940:6930-6940
     env_file:
       - .env
+  db:
+    image: "postgres:15.0"
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - db_data:/var/lib/postgresql/data/pgdata
+
+volumes:
+  db_data:

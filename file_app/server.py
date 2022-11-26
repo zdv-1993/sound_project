@@ -4,7 +4,7 @@ from os import path, makedirs
 import selectors
 import types
 from typing import Optional
-from constants import COMMAND_GET_FILE_PARAMS, COMMAND_GET_FILE_DATA, COMMAND_UPLOAD_WITH_PARAMS, READY_TO_UPLOAD_RESPONSE, PORT, HASH_DOES_NOT_COMPARE_RESPONSE, ALREADY_EXIST_RESPONSE, SENDED_BYTES_COUNT, SUCCESS_RESPONSE, FILE_NOT_FOUND_RESPONSE, UPLOADING_ERROR_RESPONSE
+from shared.constants import COMMAND_GET_FILE_PARAMS, COMMAND_GET_FILE_DATA, COMMAND_GET_FILES_LIST, COMMAND_UPLOAD_WITH_PARAMS, READY_TO_UPLOAD_RESPONSE, PORT, HASH_DOES_NOT_COMPARE_RESPONSE, ALREADY_EXIST_RESPONSE, SENDED_BYTES_COUNT, SUCCESS_RESPONSE, FILE_NOT_FOUND_RESPONSE, UPLOADING_ERROR_RESPONSE
 import time
 import hashlib
 import os
@@ -183,14 +183,19 @@ def command_get_file_data(sock, params: dict):
         sock.send(file_bytes_data_item)
     return True
 
-def command_get_files_list(sock, params: dict)
+def command_get_files_list(sock, params: dict):
     files_total_list = []
-    for _, _, files in os.walk()
+    for _, _, files in os.walk(UPLOAD_FOLDER):
+        for file_name in files:
+            if not file_name.endswith("_meta"):
+                files_total_list.append(file_name)
+    sock.send(json.dumps(files_total_list).encode())
 
 COMMANDS_MAPPER = {
     COMMAND_UPLOAD_WITH_PARAMS: command_upload_file_with_params,
     COMMAND_GET_FILE_PARAMS: command_get_file_params,
     COMMAND_GET_FILE_DATA: command_get_file_data,
+    COMMAND_GET_FILES_LIST: command_get_files_list,
 }
 
 
@@ -217,8 +222,6 @@ def accept_wrapper(sock):
 
 
 def service_connection(key, mask):
-    # from pudb import remote
-    # remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6930)
     sock = key.fileobj
     data = key.data
     if mask & selectors.EVENT_READ:
@@ -234,8 +237,6 @@ def service_connection(key, mask):
             return
         # data.outb += recv_data
         try:
-            # from pudb import remote
-            # remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6930)
             command_function, params = get_command_and_data_from_bytes(recv_data)
             print(command_function)
             command_function(sock, params)

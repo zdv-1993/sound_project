@@ -1,16 +1,15 @@
 import socket
 import json
 import hashlib
-from constants import COMMAND_UPLOAD_WITH_PARAMS, COMMAND_GET_FILE_PARAMS, PORT, SENDED_BYTES_COUNT, COMMAND_GET_FILE_DATA
+from .constants import COMMAND_UPLOAD_WITH_PARAMS, COMMAND_GET_FILE_PARAMS, FILE_SERVER_PORT, FILE_SERVER_HOST, SENDED_BYTES_COUNT, COMMAND_GET_FILE_DATA, COMMAND_GET_FILES_LIST
 import copy
 
 
-HOST = socket.gethostname()
 
 MAX_TRIES_COUNT = 100
 
 
-class FileUploaderClient:
+class FileAppClient:
 
     def __init__(self):
         self._connect()
@@ -19,7 +18,7 @@ class FileUploaderClient:
         self._client_socket = socket.socket()  # instantiate
         self._client_socket.settimeout(10)
         self._client_socket.setblocking(True)
-        self._client_socket.connect((HOST, PORT))  # connect to the server
+        self._client_socket.connect((FILE_SERVER_HOST, FILE_SERVER_PORT))  # connect to the server
 
     def _send_to_socket(self, input_data: bytes):
         return self._client_socket.send(input_data)
@@ -103,11 +102,16 @@ class FileUploaderClient:
         self.send_json_data(COMMAND_GET_FILE_DATA, sha256=sha256_str)
         return self.recv_bytes_data(file_len)
 
+    def get_files_list(self):
+        self.send_json_data(COMMAND_GET_FILES_LIST)
+        return self.recv_json_data()
+
+
 
 def client_program():
     path = '20210428_124004.jpg'
-    file_data = open(path, 'rb').read()
-    file_uploader_client = FileUploaderClient()
+    # file_data = open(path, 'rb').read()
+    file_uploader_client = FileAppClient()
     file_params = file_uploader_client.get_file_params(sha256_str="3aaadfc62231f81c3bf29173d0975df9eebd5f9b6662962b7dc34c3f3b657f0f")
     print(file_params)
 
@@ -136,6 +140,8 @@ def client_program():
     print(uploaded_resp)
     file_params = file_uploader_client.get_file_params(sha256_str="3aaadfc62231f81c3bf29173d0975df9eebd5f9b6662962b7dc34c3f3b657f0f")
     print(file_params)
+    file_list = file_uploader_client.get_files_list()
+    print(file_list)
 
 
 if __name__ == '__main__':
