@@ -1,2 +1,4 @@
 py-deezer
 pudb
+jinja2
+fastapi

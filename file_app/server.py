@@ -4,7 +4,7 @@ from os import path, makedirs
 import selectors
 import types
 from typing import Optional
-from shared.constants import COMMAND_GET_FILE_PARAMS, COMMAND_GET_FILE_DATA, COMMAND_GET_FILES_LIST, COMMAND_UPLOAD_WITH_PARAMS, READY_TO_UPLOAD_RESPONSE, PORT, HASH_DOES_NOT_COMPARE_RESPONSE, ALREADY_EXIST_RESPONSE, SENDED_BYTES_COUNT, SUCCESS_RESPONSE, FILE_NOT_FOUND_RESPONSE, UPLOADING_ERROR_RESPONSE
+from shared.constants import COMMAND_GET_FILE_PARAMS, COMMAND_GET_FILE_DATA, COMMAND_GET_FILES_LIST, COMMAND_UPLOAD_WITH_PARAMS, READY_TO_UPLOAD_RESPONSE, FILE_SERVER_PORT, HASH_DOES_NOT_COMPARE_RESPONSE, ALREADY_EXIST_RESPONSE, SENDED_BYTES_COUNT, SUCCESS_RESPONSE, FILE_NOT_FOUND_RESPONSE, UPLOADING_ERROR_RESPONSE
 import time
 import hashlib
 import os
@@ -265,7 +265,7 @@ def server_program():
 
     # server_socket = socket.socket()  # get instance
     # look closely. The bind() function takes tuple as argument
-    server_socket.bind((host, PORT))  # bind host address and port together
+    server_socket.bind((host, FILE_SERVER_PORT))  # bind host address and port together
 
     # configure how many client the server can listen simultaneously
     server_socket.listen(100)
