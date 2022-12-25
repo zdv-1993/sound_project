@@ -73,7 +73,7 @@ searchField.addEventListener("change", function(){
 function updateMusicFromDb() {
   let music_div_raw = document.getElementById("musicFromDb");
   music_div_raw.innerHTML = "";
-  let url = new URL("http://149.154.68.62/api/tracks");
+  let url = new URL("http://149.154.68.62:8000/api/tracks");
   getJSON(url, 
     function(err, data) {
     if (err !== null) {
