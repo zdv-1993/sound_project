@@ -21,10 +21,24 @@ class FileAppClient:
         self._client_socket.connect((FILE_SERVER_HOST, FILE_SERVER_PORT))  # connect to the server
 
     def _send_to_socket(self, input_data: bytes):
-        return self._client_socket.send(input_data)
+        try:
+            return self._client_socket.send(input_data)
+        except BrokenPipeError:
+            self._connect()
+            return self._client_socket.send(input_data)
 
     def _recv_from_socket(self, bytes_count: int) -> bytes:
-        return self._client_socket.recv(bytes_count)
+        res = bytes()
+        for _ in range(0, bytes_count, SENDED_BYTES_COUNT):
+            try:
+                item = self._client_socket.recv(SENDED_BYTES_COUNT)
+            except ConnectionResetError:
+                self._connect()
+                item = self._client_socket.recv(SENDED_BYTES_COUNT)
+            if not item:
+                break
+            res += item
+        return res
 
     @staticmethod
     def _get_json_data(json_bytes: bytes):
@@ -39,8 +53,8 @@ class FileAppClient:
         params["command"] = command
         self._send_to_socket(self._get_bytes_from_data(params))
     
-    def recv_json_data(self):
-        bytes_data = self._recv_from_socket(SENDED_BYTES_COUNT)
+    def recv_json_data(self, size=SENDED_BYTES_COUNT):
+        bytes_data = self._recv_from_socket(size)
         return self._get_json_data(bytes_data)
     
     def recv_bytes_data(self, bytes_count):
@@ -63,9 +77,12 @@ class FileAppClient:
             self._send_to_socket(bytes_data[start_bytes_position:start_bytes_position+SENDED_BYTES_COUNT])
     
     def _upload_file(self, file_bytes: bytes, extra_params: dict = {}):
-        params = copy.copy(extra_params)
+        params = {}
         params["sha256"] = hashlib.sha256(file_bytes).hexdigest()
         params["file_len"] = len(file_bytes)
+        extra_params_bytes = json.dumps(extra_params).encode()
+        params["file_params_len"] = len(extra_params_bytes)
+
         # TODO: убрать
         params["overwrite"] = True
 
@@ -75,28 +92,49 @@ class FileAppClient:
         if "error" in first_step_data:
             print(first_step_data)
             return False
-        
-        self.send_bytes_data(file_bytes)
+
+        self.send_bytes_data(extra_params_bytes)
         second_step_result = self.recv_json_data()
         if "error" in second_step_result:
             print(second_step_result)
             return False
-        print(second_step_result)
-        return True
         
-    def upload_music(self, file_bytes: bytes, image: str, author: str, album: str, source: str, source_data: dict):
+        self.send_bytes_data(file_bytes)
+        third_step_result = self.recv_json_data()
+        if "error" in third_step_result:
+            print(third_step_result)
+            return False
+        print(third_step_result)
+        return True
+    
+    def upload_cover(self, file_bytes: bytes, source_name: str, source_id: str, content_type: str="image/jpeg"):
         extra_params = {
-            "image": image,
-            "author": author,
-            "album": album,
-            "source": source,
-            "source_data": source_data,
+            "source_name": source_name,
+            "source_id": source_id,
+            "type": "image",
+            "content_type": content_type,
         }
         return self._upload_file(file_bytes=file_bytes, extra_params=extra_params)
 
+    def upload_music(self, file_bytes: bytes, source_name: str, source_id: str, source_data: dict, image: str):
+        extra_params = {
+            "source_name": source_name,
+            "source_id": source_id,
+            "type": "music",
+            "source_data": source_data,
+            "image": image,
+        }
+        return self._upload_file(file_bytes=file_bytes, extra_params=extra_params)
+    
     def get_file_params(self, sha256_str):
         self.send_json_data(COMMAND_GET_FILE_PARAMS, sha256=sha256_str)
-        return self.recv_json_data()
+        first_step_data = self.recv_json_data(SENDED_BYTES_COUNT)
+        if "error" in first_step_data:
+            return
+        self.send_json_data({"ready": True})
+        file_params = self.recv_json_data(first_step_data["len"])
+        file_params["hash"] = sha256_str
+        return file_params
     
     def get_file_data(self, sha256_str, file_len):
         self.send_json_data(COMMAND_GET_FILE_DATA, sha256=sha256_str)
@@ -142,7 +180,7 @@ def client_program():
     print(file_params)
     file_list = file_uploader_client.get_files_list()
     print(file_list)
-
+ 
 
 if __name__ == '__main__':
     client_program()

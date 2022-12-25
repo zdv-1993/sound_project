@@ -117,20 +117,29 @@ class CommandNotFoundException(Exception):
 
 
 def command_upload_file_with_params(sock, params: dict):
-    for required_field in ["sha256", "file_len"]:
+    
+    for required_field in ["sha256", "file_len", "file_params_len"]:
         if not params.get(required_field):
             raise InputDataValidateException(f"param {required_field} is required")
     if is_exist(params["sha256"]):
         if not params.pop("overwrite", False):
             sock.send(json.dumps(ALREADY_EXIST_RESPONSE).encode())
             return
-    # from pudb import remote
-    # remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6930)
+
     sock.send(json.dumps(READY_TO_UPLOAD_RESPONSE).encode())
 
+    file_params_len = params.pop("file_params_len")
+    file_params_bytes = bytes()
+    while len(file_params_bytes) < file_params_len:
+        item = _read_from_socket(sock, bytes_count=SENDED_BYTES_COUNT)
+        if not item:
+            break
+        file_params_bytes += item
+    file_params = json.loads(file_params_bytes)
+    file_params.update(params)
+    sock.send(json.dumps(READY_TO_UPLOAD_RESPONSE).encode())
 
-    
-    file_data = b""
+    file_data = bytes()
     # item = True
     i = 0
     # while len(file_data) < params["file_len"] or i < 1000:
@@ -144,14 +153,13 @@ def command_upload_file_with_params(sock, params: dict):
 
         # i+=1
         # item = _read_from_socket(sock, bytes_count=SENDED_BYTES_COUNT)
-    # from pudb import remote
-    # remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6930)
+
     real_sha_256 = hashlib.sha256(file_data).hexdigest()
     # Проверяем, что хеш соответствует
     if real_sha_256 != params["sha256"]:
         sock.send(json.dumps(HASH_DOES_NOT_COMPARE_RESPONSE).encode())
         return
-    is_writed = write_file(params=params, data_bytes=file_data, sha256_str=real_sha_256)
+    is_writed = write_file(params=file_params, data_bytes=file_data, sha256_str=real_sha_256)
     if is_writed:
         sock.send(json.dumps(SUCCESS_RESPONSE).encode())
     else:
@@ -160,6 +168,8 @@ def command_upload_file_with_params(sock, params: dict):
 
 
 def command_get_file_params(sock, params: dict):
+    # from pudb import remote
+    # remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6910)
     for required_field in ["sha256"]:
         if not params.get(required_field):
             raise InputDataValidateException(f"param {required_field} is required")
@@ -167,6 +177,9 @@ def command_get_file_params(sock, params: dict):
     if not file_params_bytes_data:
         sock.send(json.dumps(ALREADY_EXIST_RESPONSE).encode())
         return
+    sock.send(json.dumps({"len": len(file_params_bytes_data)}).encode())
+    ready_resp = _read_from_socket(sock, bytes_count=SENDED_BYTES_COUNT)
+    
     sock.send(file_params_bytes_data)
     return True
 
@@ -245,6 +258,7 @@ def service_connection(key, mask):
             pass
             # sel.unregister(sock)
             # sock.close() 
+        
 
     if mask & selectors.EVENT_WRITE:
         # print("selector write")

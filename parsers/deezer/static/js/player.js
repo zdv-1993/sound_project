@@ -56,19 +56,26 @@ let track_list_static = [
     path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3",
     },
 ];
-let url_rr = "http://127.0.0.1:60000/api/search?q=%D0%B2%D0%B5%D1%81%D0%B5%D0%BB%D0%B0%D1%8F";
-// let track_list = await (await fetch(url_rr)).json();
-let track_list;
 
-getJSON(url_rr, 
-function(err, data) {
-  if (err !== null) {
-    alert('Something went wrong: ' + err);
-  } else {
-    track_list = data;
-    loadTrack(track_index);
-  }
-});
+let track_list = [];
+
+
+function searchTrack(){
+
+    let url = new URL("http://127.0.0.1:60000/api/search");
+    let q = document.getElementById("search").value
+    url.searchParams.set('q', q);
+    getJSON(url, 
+    function(err, data) {
+    if (err !== null) {
+        alert('Something went wrong: ' + err);
+    } else {
+        track_list = data;
+        renderTrackList(track_list);
+        loadTrack(track_index);
+    }
+    });
+}
 
 //debugger;
 //get_json_from_url(url_rr).then(r => track_list = r);
@@ -80,7 +87,17 @@ function(err, data) {
 //     .then(function(data){
 //         console.log(data);
 //     });
-
+function renderTrackList(tracks){
+    document.getElementById("track_list").innerHTML = "";
+    tracks.forEach(addTrackToList);
+    function addTrackToList(item, index, arr) {
+        var element = document.createElement("div");
+        element.innerHTML = item.name + " " + item.artist;
+        element.setAttribute("onclick","loadTrack("+ index +"); playTrack()");
+        element.setAttribute("class", "track-item");
+        document.getElementById("track_list").appendChild(element);
+      }
+}
 function loadTrack(track_index) {
     clearInterval(updateTimer);
     resetValues();

@@ -9,11 +9,12 @@ services:
       - ./uploads:/uploads
     ports:
       - 50000:50000
-      # - 6930-6940:6930-6940
+      - 6910-6920:6910-6920
     env_file:
       - .env
     environment:
       - FILE_FOLDER=/uploads
+    restart: unless-stopped
   deezer_parser:
     build:
       context: ./parsers/deezer
@@ -22,7 +23,7 @@ services:
       - ./shared:/app/shared
     ports:
       - 60000:60000
-      - 6930-6940:6930-6940
+      #- 6930-6940:6930-6940
     env_file:
       - .env
   db_app:
@@ -33,7 +34,7 @@ services:
       - ./shared:/app/shared
     ports:
       - 8000:8000
-      # - 6930-6940:6930-6940
+      - 6930-6940:6930-6940
     env_file:
       - .env
   db:

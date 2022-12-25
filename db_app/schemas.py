@@ -16,10 +16,17 @@ class CreateTrack(BaseModel):
 
     @property
     def hashed(self):
-        return hash(tuple(self.title, ) + tuple(self.data.artists))
+        return str(hash(tuple(self.title, ) + tuple(self.data.artists)))
 
 
 class CreateTrackFile(BaseModel):
     id: str
     info: dict
     track_id: int
+
+
+class TrackApiOutput(BaseModel):
+    id: str
+    title: str
+    link: str
+    artist: str

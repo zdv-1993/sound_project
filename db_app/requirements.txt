@@ -2,3 +2,4 @@ fastapi
 uvicorn[standard]
 SQLAlchemy==2.0.0b3
 psycopg2-binary
+jinja2
