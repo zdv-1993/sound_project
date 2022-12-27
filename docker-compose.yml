@@ -7,9 +7,9 @@ services:
       - ./file_app:/app
       - ./shared:/app/shared
       - ./uploads:/uploads
-    ports:
-      - 50000:50000
-      - 6910-6920:6910-6920
+    #ports:
+      #- 50000:50000
+      #- 6910-6920:6910-6920
     env_file:
       - .env
     environment:

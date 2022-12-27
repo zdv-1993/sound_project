@@ -142,7 +142,9 @@ class FileAppClient:
 
     def get_files_list(self):
         self.send_json_data(COMMAND_GET_FILES_LIST)
-        return self.recv_json_data()
+        first_step_data = self.recv_json_data(SENDED_BYTES_COUNT)
+        self.send_json_data({"ready": True})
+        return self.recv_json_data(first_step_data["len"])
 
 
 

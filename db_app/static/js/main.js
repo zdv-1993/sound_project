@@ -21,7 +21,7 @@ var getJSON = function(url, callback) {
 
 searchField.addEventListener("change", function(){
     let q = searchField.value;
-    let url = new URL("http://149.154.68.62:60000/api/search");
+    let url = new URL("http://" + window.location.hostname + ":60000/api/search");
     url.searchParams.set('q', q);
     getJSON(url, 
     function(err, data) {
@@ -73,7 +73,7 @@ searchField.addEventListener("change", function(){
 function updateMusicFromDb() {
   let music_div_raw = document.getElementById("musicFromDb");
   music_div_raw.innerHTML = "";
-  let url = new URL("http://149.154.68.62:8000/api/tracks");
+  let url = new URL("http://" + window.location.hostname + ":8000/api/tracks");
   getJSON(url, 
     function(err, data) {
     if (err !== null) {

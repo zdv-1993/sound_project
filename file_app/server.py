@@ -164,6 +164,7 @@ def command_upload_file_with_params(sock, params: dict):
         sock.send(json.dumps(SUCCESS_RESPONSE).encode())
     else:
         sock.send(json.dumps(UPLOADING_ERROR_RESPONSE).encode())
+    
     return True
 
 
@@ -202,7 +203,11 @@ def command_get_files_list(sock, params: dict):
         for file_name in files:
             if not file_name.endswith("_meta"):
                 files_total_list.append(file_name)
-    sock.send(json.dumps(files_total_list).encode())
+    sended_bytes = json.dumps(files_total_list).encode()
+    sock.send(json.dumps({"len": len(sended_bytes)}).encode())
+    ready_resp = _read_from_socket(sock, bytes_count=SENDED_BYTES_COUNT)
+    sock.send(sended_bytes)
+    return True
 
 COMMANDS_MAPPER = {
     COMMAND_UPLOAD_WITH_PARAMS: command_upload_file_with_params,
