@@ -33,8 +33,33 @@ class TrackImporter:
             artist_name=artist_name,
             data=track_data,
         )
+    def _get_track_yandex(self) -> CreateTrack:
+        from pudb import remote
+        remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6930)
+        yandex_data = self._file_params["source_data"]
+        track_title = yandex_data["title"]
+        artist_name = yandex_data["artists"][0]["name"]
+        album_title = yandex_data["albums"][0]["title"]
+        artists = [i["name"] for i in yandex_data["artists"]]
+        try:
+            # TODO: Поправить получение года
+            year = yandex_data["year"]
+        except:
+            year = 1900
+        track_data = TrackData(
+            album=album_title,
+            artists=artists,
+            year=year,
+        )
+        return CreateTrack(
+            title=track_title,
+            artist_name=artist_name,
+            data=track_data,
+        )
 
-    def _get_track_file_deezer(self, track_id: str) -> CreateTrackFile:
+
+
+    def _get_track_file(self, track_id: str) -> CreateTrackFile:
         deezer_data = self._file_params["source_data"]
         return CreateTrackFile(
             id=self._file_params["hash"],
@@ -51,7 +76,7 @@ class TrackImporter:
 
     def get_track_file(self, track_id: str):
         source = self._file_params["source_name"]
-        get_track_file_func = getattr(self, f"_get_track_file_{source}")
+        get_track_file_func = getattr(self, f"_get_track_file")
         return get_track_file_func(track_id)
 
 
