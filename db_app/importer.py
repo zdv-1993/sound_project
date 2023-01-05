@@ -34,8 +34,6 @@ class TrackImporter:
             data=track_data,
         )
     def _get_track_yandex(self) -> CreateTrack:
-        from pudb import remote
-        remote.set_trace(term_size=(180, 39), host='0.0.0.0', port=6930)
         yandex_data = self._file_params["source_data"]
         track_title = yandex_data["title"]
         artist_name = yandex_data["artists"][0]["name"]
