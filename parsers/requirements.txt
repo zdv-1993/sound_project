@@ -1,0 +1,5 @@
+py-deezer
+pudb
+jinja2
+fastapi
+yandex-music
