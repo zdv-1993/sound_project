@@ -27,7 +27,8 @@ loadButton.addEventListener(
 
     function preloadTrack(item, data) {
       setTimeout(() => {
-        item.load();
+        item.play();
+        item.pause();
       }, data * 15000)
     }
     audioList.forEach(preloadTrack);
