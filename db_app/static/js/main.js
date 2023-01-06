@@ -2,6 +2,8 @@ var searchField = document.getElementById("searchField");
 
 var tableSearchBody = document.getElementById("tableSearchBody");
 
+var loadButton = document.getElementById("loadButton");
+
 
 var getJSON = function(url, callback) {
     var xhr = new XMLHttpRequest();
@@ -17,6 +19,20 @@ var getJSON = function(url, callback) {
     };
     xhr.send();
 };
+
+
+loadButton.addEventListener(
+  "click", function () {
+    var audioList = Array.from(document.getElementsByTagName("audio"));
+
+    function preloadTrack(item, data) {
+      setTimeout(() => {
+        item.load();
+      }, data * 15000)
+    }
+    audioList.forEach(preloadTrack);
+  }
+)
 
 
 searchField.addEventListener("change", function(){
@@ -87,6 +103,8 @@ function updateMusicFromDb() {
         audio_elem.setAttribute("controls", "");
         audio_elem.setAttribute("src", item.link);
         audio_elem.setAttribute("title", item.title);
+        audio_elem.setAttribute("preload", "none");
+
 
         music_div_raw.appendChild(p_elem);
         music_div_raw.appendChild(audio_elem);
