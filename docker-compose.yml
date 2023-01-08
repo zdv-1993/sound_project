@@ -14,7 +14,7 @@ services:
       - .env
     environment:
       - FILE_FOLDER=/uploads
-    restart: unless-stopped
+    restart: always
   parser:
     build:
       context: ./parsers
@@ -37,6 +37,8 @@ services:
 #      - 6930-6940:6930-6940
     env_file:
       - .env
+    restart: always
+
   db:
     image: "postgres:15.0"
     env_file:
@@ -45,6 +47,7 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - db_data:/var/lib/postgresql/data/pgdata
+    restart: always
 
 volumes:
   db_data:
